@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health of U.S. Forests</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        body { margin: 0; }
+        #map { height: 80vh; }
+        #sidebar {
+            padding: 10px;
+            background: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Health of U.S. Forests</h1>
+<h3>Exploring patterns of forest disturbance and restoration needs</h3>
+
+<div id="map"></div>
+
+<div id="sidebar">
+    <!-- Placeholder for filters -->
+    <label>Select Indicator:</label>
+    <select>
+        <option>Counties</option>
+        <option>States</option>
+        <option> </option>
+    </select>
+
+    <!-- Placeholder for future chart -->
+    <p>Chart placeholder</p>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    // Initialize map centered on US
+    var map = L.map('map').setView([39.5, -98.5], 4);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // TODO: Add forest data layer
+    // Load States
+fetch('/Data/Forest_Percent_State_2020.geojson')
+  .then(response => response.json())
+  .then(data => {
+
+    function getColor(d) {
+      return d > 80 ? '#00441b' :
+             d > 60 ? '#238b45' :
+             d > 40 ? '#66c2a4' :
+             d > 20 ? '#ccece6' :
+                      '#f7fcf5';
+    }
+
+    function style(feature) {
+      return {
+        fillColor: getColor(feature.properties.forest_pct),
+        weight: 1,
+        opacity: 1,
+        color: 'white',
+        fillOpacity: 0.7
+      };
+    }
+
+    function onEachFeature(feature, layer) {
+      layer.bindPopup(
+        "<b>" + feature.properties.NAME + "</b><br>" +
+        "Forest Cover: " + feature.properties.forest_pct.toFixed(1) + "%"
+      );
+    }
+
+    statesLayer = L.geoJson(data, {
+      style: style,
+      onEachFeature: onEachFeature
+    }).addTo(map);
+
+  });
+
+  let countiesLayer;
+
+fetch('data/counties_forest.geojson')
+  .then(response => response.json())
+  .then(data => {
+
+    countiesLayer = L.geoJson(data, {
+      style: function(feature) {
+        return {
+          fillColor: getColor(feature.properties.forest_pct),
+          weight: 0.5,
+          opacity: 1,
+          color: '#ccc',
+          fillOpacity: 0.7
+        };
+      },
+      onEachFeature: function(feature, layer) {
+        layer.bindPopup(
+          "<b>" + feature.properties.NAME + "</b><br>" +
+          "Forest Cover: " + feature.properties.forest_pct.toFixed(1) + "%"
+        );
+      }
+    });
+
+  });
+
+
+    // TODO: Add choropleth styling
+function getColor(d) {
+    return d > 60 ? '#00441b' :
+           d > 40 ? '#238b45' :
+           d > 20 ? '#66c2a4' :
+                    '#ccece6';
+}
+
+function style(feature) {
+    return {
+        fillColor: getColor(feature.properties.forest_cover),
+        weight: 1,
+        opacity: 1,
+        color: 'white',
+        fillOpacity: 0.7
+    };
+}
+
+    // TODO: Add interactive tooltips
+
+
+    function onEachFeature(feature, layer) {
+    layer.bindPopup(
+        "<b>" + feature.properties.name + "</b><br>" +
+        "Forest Cover: " + feature.properties.forest_cover + "%"
+    );
+}
+
+document.querySelector("select").addEventListener("change", function(e) {
+    console.log("Selected:", e.target.value);
+});
+
+</script>
+
+</body>
+</html>
