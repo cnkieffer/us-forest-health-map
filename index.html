@@ -28,8 +28,8 @@
     <!-- Placeholder for filters -->
     <label>Select Indicator:</label>
     <select>
-        <option>Counties</option>
         <option>States</option>
+        <option>Counties</option>
         <option> </option>
     </select>
 
@@ -48,82 +48,114 @@
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+function getColor(d) {
+ if (d === null || isNaN(d)) return '#bdbdbd'; 
+  if (d === 0) return '#d9d9d9';               
+  return d > 80 ? '#00441b' :
+         d > 60 ? '#238b45' :
+         d > 40 ? '#66c2a4' :
+         d > 20 ? '#ccece6' :
+                  '#e5f5e0';
+}
+
+
     // TODO: Add forest data layer
     // Load States
-fetch('/Data/Forest_Percent_State_2020.geojson')
+let statesLayer;
+
+fetch('Data/Forest_Percent_State_2020.geojson')
   .then(response => response.json())
   .then(data => {
 
-    function getColor(d) {
-      return d > 80 ? '#00441b' :
-             d > 60 ? '#238b45' :
-             d > 40 ? '#66c2a4' :
-             d > 20 ? '#ccece6' :
-                      '#f7fcf5';
-    }
-
-    function style(feature) {
-      return {
-        fillColor: getColor(feature.properties.forest_pct),
-        weight: 1,
-        opacity: 1,
-        color: 'white',
-        fillOpacity: 0.7
-      };
-    }
-
-    function onEachFeature(feature, layer) {
-      layer.bindPopup(
-        "<b>" + feature.properties.NAME + "</b><br>" +
-        "Forest Cover: " + feature.properties.forest_pct.toFixed(1) + "%"
-      );
-    }
-
     statesLayer = L.geoJson(data, {
-      style: style,
-      onEachFeature: onEachFeature
-    }).addTo(map);
+
+      style: function(feature) {
+        return {
+          fillColor: getColor(feature.properties.forest_pct),
+          weight: 1.5,
+          color: 'white',
+          fillOpacity: 0.7
+        };
+      },
+
+      onEachFeature: function(feature, layer) {
+        let value = feature.properties.forest_pct;
+
+        if (value !== null && !isNaN(value)) {
+          value = value.toFixed(1) + "%";
+        } else {
+          value = "No Data";
+        }
+
+        layer.bindPopup(
+          "<b>" + feature.properties.NAME + "</b><br>" +
+          "Forest Cover: " + value
+        );
+      }
+
+    }).addTo(map); // states visible by default
 
   });
 
-  let countiesLayer;
+let countiesLayer;
 
-fetch('data/counties_forest.geojson')
+fetch('data/Forest_Percent_County_2020.geojson')
   .then(response => response.json())
   .then(data => {
 
     countiesLayer = L.geoJson(data, {
+
       style: function(feature) {
+
+        let value = Number(feature.properties.Forest_Percent_County_2020);
+
+        if (isNaN(value)) value = 0;
+
         return {
-          fillColor: getColor(feature.properties.forest_pct),
-          weight: 0.5,
-          opacity: 1,
-          color: '#ccc',
-          fillOpacity: 0.7
+          fillColor: getColor(value),
+          weight: 0.6,
+          color: '#666',
+          fillOpacity: 0.85
         };
       },
+
       onEachFeature: function(feature, layer) {
+
+        let value = Number(feature.properties.Forest_Percent_County_2020);
+        if (isNaN(value)) value = 0;
+
         layer.bindPopup(
           "<b>" + feature.properties.NAME + "</b><br>" +
-          "Forest Cover: " + feature.properties.forest_pct.toFixed(1) + "%"
+          "Forest Cover: " + value.toFixed(1) + "%"
         );
+      }
+
+    });
+
+  });
+
+  let stateOutlineLayer;
+
+fetch('Data/Forest_Percent_State_2020.geojson')
+  .then(response => response.json())
+  .then(data => {
+
+    stateOutlineLayer = L.geoJson(data, {
+      style: {
+        fill: false,
+        color: 'black',
+        weight: 1.2
       }
     });
 
   });
 
-
     // TODO: Add choropleth styling
-function getColor(d) {
-    return d > 60 ? '#00441b' :
-           d > 40 ? '#238b45' :
-           d > 20 ? '#66c2a4' :
-                    '#ccece6';
-}
+
 
 function style(feature) {
     return {
-        fillColor: getColor(feature.properties.forest_cover),
+        fillColor: getColor(feature.properties.forest_pct),
         weight: 1,
         opacity: 1,
         color: 'white',
@@ -142,7 +174,23 @@ function style(feature) {
 }
 
 document.querySelector("select").addEventListener("change", function(e) {
-    console.log("Selected:", e.target.value);
+
+  if (e.target.value === "States") {
+
+    map.removeLayer(countiesLayer);
+    map.removeLayer(stateOutlineLayer);
+    map.addLayer(statesLayer);
+
+  }
+
+  if (e.target.value === "Counties") {
+
+    map.removeLayer(statesLayer);
+    map.addLayer(countiesLayer);
+    map.addLayer(stateOutlineLayer); // outline on top
+
+  }
+
 });
 
 </script>
