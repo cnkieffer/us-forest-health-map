@@ -137,11 +137,14 @@
   // Color function for choropleth
   function getColor(d) {
     if (d === null || isNaN(d)) return '#bdbdbd';
-    if (d === 0) return '#d9d9d9';
-    return d > 80 ? '#00441b' :
-           d > 60 ? '#238b45' :
-           d > 40 ? '#66c2a4' :
-           d > 20 ? '#ccece6' :
+    if (d === 0) return '#c0c0c0';
+    return d > 80 ? '#194d19' :
+           d > 70 ? '#267326' :
+           d > 60 ? '#339933' :
+           d > 50 ? '#40bf40' :
+           d > 40 ? '#66cc66' :
+           d > 30 ? '#8cd98c' :
+           d > 20 ? '#b3e6b3' :
                     '#e5f5e0';
   }
 
@@ -156,7 +159,7 @@
         style: f => ({
           fillColor: getColor(f.properties.forest_pct),
           weight: 1.5,
-          color: 'white',
+          color: '#3c3c3c',
           fillOpacity: 0.7
         }),
         onEachFeature: function(f, layer) {
