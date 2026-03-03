@@ -1,199 +1,214 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Health of U.S. Forests</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health of U.S. Forests</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-    <style>
-        body { margin: 0; }
-        #map { height: 80vh; }
-        #sidebar {
-            padding: 10px;
-            background: #f4f4f4;
-        }
-    </style>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #333;
+      font-family: "Open Sans", sans-serif;
+      color: #eee;
+    }
+
+    /* Header */
+    header {
+  position: relative;
+  z-index: 1200;
+  padding: 20px 30px; /* more space from left and right */
+  max-width: 1200px;   /* optional: limit width on large screens */
+  margin: 0 auto;      /* center header content horizontally */
+}
+
+    h1 { font-weight: 900; margin: 0; }
+    h3 { margin: 5px 0; }
+
+    #indicatorDropdown {
+      margin-top: 10px;
+    }
+
+    /* Map container */
+    #map {
+      height: calc(100vh - 120px); /* leave space for header */
+      background: #3f3f3f;
+      z-index: 1;
+    }
+
+    /* Map Info button */
+    #mapInfoBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1300; /* above everything */
+      padding: 0.5rem 1rem;
+      background-color: #238b45;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    #mapInfoBtn:hover { background-color: #66c2a4; }
+
+    /* Sidebar */
+    #sidebar {
+      position: fixed;
+      top: 130px; /* below header */
+      left: -320px;
+      width: 300px;
+      height: calc(100vh - 120px);
+      background-color: #444;
+      color: #eee;
+      padding: 1rem;
+      transition: left 0.3s ease;
+      z-index: 1250; /* below Map Info button */
+      overflow-y: auto;
+    }
+    #sidebar.open { left: 0; }
+
+    select {
+      appearance: none;
+      border: none;
+      background-color: #555;
+      color: #eee;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    select option { color: #000; }
+  </style>
 </head>
 <body>
 
-<h1>Health of U.S. Forests</h1>
-<h3>Exploring patterns of forest disturbance and restoration needs</h3>
-
-<div id="map"></div>
-
-<div id="sidebar">
-    <!-- Placeholder for filters -->
+<header>
+  <h1>Health of U.S. Forests</h1>
+  <h3>Exploring patterns of forest disturbance and restoration needs</h3>
+  <div id="indicatorDropdown">
     <label>Select Indicator:</label>
     <select>
-        <option>States</option>
-        <option>Counties</option>
-        <option> </option>
+      <option>States</option>
+      <option>Counties</option>
     </select>
+  </div>
+</header>
 
-    <!-- Placeholder for future chart -->
-    <p>Chart placeholder</p>
-</div>
+<!-- Map Info Button -->
+<button id="mapInfoBtn">Map Info</button>
+
+<!-- Sliding Sidebar -->
+<aside id="sidebar">
+  <h2>Map Info</h2>
+  <p>Instructions or details about the map go here.</p>
+  <p>Charts and other info can go here.</p>
+</aside>
+
+<main>
+  <div id="map"></div>
+</main>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
-    // Initialize map centered on US
-    var map = L.map('map').setView([39.5, -98.5], 4);
+  // Initialize map (zoomControl disabled, we'll add manually)
+  var map = L.map('map', { zoomControl: false }).setView([39.5, -98.5], 4);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+  // Add tile layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OSM',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(map);
 
-function getColor(d) {
- if (d === null || isNaN(d)) return '#bdbdbd'; 
-  if (d === 0) return '#d9d9d9';               
-  return d > 80 ? '#00441b' :
-         d > 60 ? '#238b45' :
-         d > 40 ? '#66c2a4' :
-         d > 20 ? '#ccece6' :
-                  '#e5f5e0';
-}
+  // Add zoom control top-right
+  L.control.zoom({ position: 'topright' }).addTo(map);
 
+  // Toggle sidebar
+  const mapInfoBtn = document.getElementById("mapInfoBtn");
+  const sidebar = document.getElementById("sidebar");
+  mapInfoBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+  });
 
-    // TODO: Add forest data layer
-    // Load States
-let statesLayer;
+  // Color function for choropleth
+  function getColor(d) {
+    if (d === null || isNaN(d)) return '#bdbdbd';
+    if (d === 0) return '#d9d9d9';
+    return d > 80 ? '#00441b' :
+           d > 60 ? '#238b45' :
+           d > 40 ? '#66c2a4' :
+           d > 20 ? '#ccece6' :
+                    '#e5f5e0';
+  }
 
-fetch('Data/Forest_Percent_State_2020.geojson')
-  .then(response => response.json())
-  .then(data => {
+  // Layers
+  let statesLayer, countiesLayer, stateOutlineLayer;
 
-    statesLayer = L.geoJson(data, {
-
-      style: function(feature) {
-        return {
-          fillColor: getColor(feature.properties.forest_pct),
+  // Load States
+  fetch('Data/Forest_Percent_State_2020.geojson')
+    .then(resp => resp.json())
+    .then(data => {
+      statesLayer = L.geoJson(data, {
+        style: f => ({
+          fillColor: getColor(f.properties.forest_pct),
           weight: 1.5,
           color: 'white',
           fillOpacity: 0.7
-        };
-      },
-
-      onEachFeature: function(feature, layer) {
-        let value = feature.properties.forest_pct;
-
-        if (value !== null && !isNaN(value)) {
-          value = value.toFixed(1) + "%";
-        } else {
-          value = "No Data";
+        }),
+        onEachFeature: function(f, layer) {
+          let value = (f.properties.forest_pct !== null && !isNaN(f.properties.forest_pct))
+                      ? f.properties.forest_pct.toFixed(1) + "%"
+                      : "No Data";
+          layer.bindPopup(`<b>${f.properties.NAME}</b><br>Forest Cover: ${value}`);
         }
-
-        layer.bindPopup(
-          "<b>" + feature.properties.NAME + "</b><br>" +
-          "Forest Cover: " + value
-        );
-      }
-
-    }).addTo(map); // states visible by default
-
-  });
-
-let countiesLayer;
-
-fetch('data/Forest_Percent_County_2020.geojson')
-  .then(response => response.json())
-  .then(data => {
-
-    countiesLayer = L.geoJson(data, {
-
-      style: function(feature) {
-
-        let value = Number(feature.properties.Forest_Percent_County_2020);
-
-        if (isNaN(value)) value = 0;
-
-        return {
-          fillColor: getColor(value),
-          weight: 0.6,
-          color: '#666',
-          fillOpacity: 0.85
-        };
-      },
-
-      onEachFeature: function(feature, layer) {
-
-        let value = Number(feature.properties.Forest_Percent_County_2020);
-        if (isNaN(value)) value = 0;
-
-        layer.bindPopup(
-          "<b>" + feature.properties.NAME + "</b><br>" +
-          "Forest Cover: " + value.toFixed(1) + "%"
-        );
-      }
-
+      }).addTo(map);
     });
 
-  });
-
-  let stateOutlineLayer;
-
-fetch('Data/Forest_Percent_State_2020.geojson')
-  .then(response => response.json())
-  .then(data => {
-
-    stateOutlineLayer = L.geoJson(data, {
-      style: {
-        fill: false,
-        color: 'black',
-        weight: 1.2
-      }
+  // Load Counties
+  fetch('data/Forest_Percent_County_2020.geojson')
+    .then(resp => resp.json())
+    .then(data => {
+      countiesLayer = L.geoJson(data, {
+        style: f => {
+          let v = Number(f.properties.Forest_Percent_County_2020);
+          if (isNaN(v)) v = 0;
+          return { fillColor: getColor(v), weight: 0.6, color: '#666', fillOpacity: 0.85 };
+        },
+        onEachFeature: function(f, layer) {
+          let value = Number(f.properties.Forest_Percent_County_2020);
+          if (isNaN(value)) value = 0;
+          layer.bindPopup(`<b>${f.properties.NAME}</b><br>Forest Cover: ${value.toFixed(1)}%`);
+        }
+      });
     });
 
+  // State outline layer
+  fetch('Data/Forest_Percent_State_2020.geojson')
+    .then(resp => resp.json())
+    .then(data => {
+      stateOutlineLayer = L.geoJson(data, {
+        style: { fill: false, color: 'black', weight: 1.2 }
+      });
+    });
+
+  // Dropdown change
+  document.querySelector("#indicatorDropdown select").addEventListener("change", function(e){
+    if(e.target.value === "States") {
+      if(countiesLayer) map.removeLayer(countiesLayer);
+      if(stateOutlineLayer) map.removeLayer(stateOutlineLayer);
+      if(statesLayer) map.addLayer(statesLayer);
+    }
+    if(e.target.value === "Counties") {
+      if(statesLayer) map.removeLayer(statesLayer);
+      if(countiesLayer) map.addLayer(countiesLayer);
+      if(stateOutlineLayer) map.addLayer(stateOutlineLayer);
+    }
   });
-
-    // TODO: Add choropleth styling
-
-
-function style(feature) {
-    return {
-        fillColor: getColor(feature.properties.forest_pct),
-        weight: 1,
-        opacity: 1,
-        color: 'white',
-        fillOpacity: 0.7
-    };
-}
-
-    // TODO: Add interactive tooltips
-
-
-    function onEachFeature(feature, layer) {
-    layer.bindPopup(
-        "<b>" + feature.properties.name + "</b><br>" +
-        "Forest Cover: " + feature.properties.forest_cover + "%"
-    );
-}
-
-document.querySelector("select").addEventListener("change", function(e) {
-
-  if (e.target.value === "States") {
-
-    map.removeLayer(countiesLayer);
-    map.removeLayer(stateOutlineLayer);
-    map.addLayer(statesLayer);
-
-  }
-
-  if (e.target.value === "Counties") {
-
-    map.removeLayer(statesLayer);
-    map.addLayer(countiesLayer);
-    map.addLayer(stateOutlineLayer); // outline on top
-
-  }
-
-});
 
 </script>
-
 </body>
 </html>
