@@ -9,6 +9,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
   <style>
+
+#controls {
+  margin-top: 10px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.dropdown label {
+  margin-right: 5px;
+}
+
     body {
       margin: 0;
       padding: 0;
@@ -88,14 +100,26 @@
 <header>
   <h1>Health of U.S. Forests</h1>
   <h3>Exploring patterns of forest disturbance and restoration needs</h3>
-  <div id="indicatorDropdown">
+<div id="controls">
+
+  <div class="dropdown">
     <label>Select Indicator:</label>
-    <select>
-      <option>States</option>
-      <option>Counties</option>
+    <select id="indicatorSelect">
+      <option value="States">States</option>
+      <option value="Counties">Counties</option>
     </select>
   </div>
-</header>
+
+  <div class="dropdown">
+    <label>Select Year:</label>
+    <select id="yearSelect">
+      <option value="2020">2020</option>
+      <option value="2021">2021</option>
+      <option value="2022">2022</option>
+    </select>
+  </div>
+
+</div>
 
 <!-- Map Info Button -->
 <button id="mapInfoBtn">Map Info</button>
@@ -199,18 +223,86 @@
     });
 
   // Dropdown change
-  document.querySelector("#indicatorDropdown select").addEventListener("change", function(e){
-    if(e.target.value === "States") {
-      if(countiesLayer) map.removeLayer(countiesLayer);
-      if(stateOutlineLayer) map.removeLayer(stateOutlineLayer);
-      if(statesLayer) map.addLayer(statesLayer);
-    }
-    if(e.target.value === "Counties") {
-      if(statesLayer) map.removeLayer(statesLayer);
-      if(countiesLayer) map.addLayer(countiesLayer);
+const indicatorSelect = document.getElementById("indicatorSelect");
+const yearSelect = document.getElementById("yearSelect");
+
+indicatorSelect.addEventListener("change", updateMap);
+yearSelect.addEventListener("change", updateMap);
+
+function updateMap(){
+
+  let indicator = indicatorSelect.value;
+  let year = yearSelect.value;
+
+  if(statesLayer) map.removeLayer(statesLayer);
+  if(countiesLayer) map.removeLayer(countiesLayer);
+  if(stateOutlineLayer) map.removeLayer(stateOutlineLayer);
+
+  if(indicator === "States"){
+
+    fetch(`Data/Forest_Percent_State_${year}.geojson`)
+    .then(resp => resp.json())
+    .then(data => {
+
+      statesLayer = L.geoJson(data,{
+        style: f => ({
+          fillColor: getColor(f.properties.forest_pct),
+          weight: 1.5,
+          color: '#3c3c3c',
+          fillOpacity: 0.7
+        }),
+        onEachFeature: function(f, layer){
+
+          let value = (f.properties.forest_pct !== null && !isNaN(f.properties.forest_pct))
+                      ? f.properties.forest_pct.toFixed(1) + "%"
+                      : "No Data";
+
+          layer.bindPopup(`<b>${f.properties.NAME}</b><br>Forest Cover: ${value}`);
+
+        }
+      }).addTo(map);
+
+    });
+
+  }
+
+  if(indicator === "Counties"){
+
+    fetch(`Data/Forest_Percent_County_${year}.geojson`)
+    .then(resp => resp.json())
+    .then(data => {
+
+      countiesLayer = L.geoJson(data,{
+        style: f => {
+
+          let v = Number(f.properties.forest_pct);
+          if(isNaN(v)) v = 0;
+
+          return {
+            fillColor: getColor(v),
+            weight: 0.6,
+            color: '#666',
+            fillOpacity: 0.85
+          };
+
+        },
+        onEachFeature: function(f, layer){
+
+          let value = Number(f.properties.forest_pct);
+          if(isNaN(value)) value = 0;
+
+          layer.bindPopup(`<b>${f.properties.NAME}</b><br>Forest Cover: ${value.toFixed(1)}%`);
+
+        }
+      }).addTo(map);
+
       if(stateOutlineLayer) map.addLayer(stateOutlineLayer);
-    }
-  });
+
+    });
+
+  }
+
+}
 
 </script>
 </body>
