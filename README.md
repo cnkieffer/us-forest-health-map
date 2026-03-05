@@ -1,6 +1,6 @@
 # US Forest Health Map
 
-### Christina Kieffer
+### By Dr. Christina Kieffer
 
 
 ## Project Descript:
