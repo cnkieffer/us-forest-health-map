@@ -1,13 +1,16 @@
-# us-forest-health-map
-Final Project Proposal
-Christina Kieffer
-Project Descript:
-For my final project I would like to focus on the current health of US forests. Potentially, I will look at depletion of National Forest Boundaries, invasive plants, timber harvests, land utilization, FIA landcover county estimates for different years, hazardous sites, and potentially including climate data. The final map may or may not include all of these variables. The purpose is to identify areas that are in need of restoration and conservation. The final map will resemble what we created in this weeks lesson. 
+# US Forest Health Map
 
-Working Title: 
-Health of US Forests 
+### Christina Kieffer
 
-Data Sources:
+
+## Project Descript:
+
+For this project I would like to focus on the current health of US forests. The purpose is to help foresters and stackholders determine what areas have the greatest restoration needs. THis will be done by looking at the percent forest cover throughout the low 48 US states over 5 years from 2020-2024. This map can be displayed viewing forest cover percent over the state or within a county. 
+
+Users should note this map only cover forest ecosystems and does not include other ecosystem types within the United States. 
+
+
+## Data Sources:
 https://www.mrlc.gov/data
 
 Map Objectives:
