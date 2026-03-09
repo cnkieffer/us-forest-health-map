@@ -3,74 +3,149 @@
 ### By Dr. Christina Kieffer
 
 
-## Project Descript:
+## Project Description
 
-For this project I would like to focus on the current health of US forests. The purpose is to help foresters and stackholders determine what areas have the greatest restoration needs. THis will be done by looking at the percent forest cover throughout the low 48 US states over 5 years from 2020-2024. This map can be displayed viewing forest cover percent over the state or within a county. 
+This project visualizes forest cover across the contiguous United States to explore spatial patterns in forest health and potential restoration needs. The map displays the percentage of forest cover across states and counties from 2020–2024.
 
-Users should note this map only cover forest ecosystems and does not include other ecosystem types within the United States. 
+Forest cover data were derived from the Annual National Land Cover Database (NLCD) provided by the Multi‑Resolution Land Characteristics Consortium. The dataset is generated from remotely sensed Landsat satellite imagery and provides classified land cover data across the United States.
+
+Users can interactively explore forest cover by:
+
+•	Switching between state-level and county-level summaries
+•	Selecting different years between 2020 and 2024
+
+The purpose of this map is to provide an accessible visualization that helps highlight areas where forest cover is lower and where forest restoration efforts may be most needed.
+
+Note: This project focuses only on forest ecosystems and does not include other ecosystem types within the United States.
+
+## How to Use the Map
+
+1. Use the Select Indicator dropdown to switch between:
+
+•	States – view forest cover summarized by state
+•	Counties – view forest cover summarized by county
+
+2. Use the Select Year dropdown to change the year displayed on the map.
+
+3. Click on any state or county to open a popup showing the percent forest cover.
+
+4. Click the Map Info button to open the sidebar with additional information about the project.
 
 
-## Data Sources:
+## Data Sources
+
+Forest land cover data were obtained from:
 
 https://www.mrlc.gov/data
 
-## Methodology:
+The Annual National Land Cover Database (NLCD) provides land cover classification derived from Landsat satellite imagery and includes multiple land cover classes across the United States.
+
+For this project, forest cover was derived from the following NLCD classes:
+
+•	41 – Deciduous Forest
+•	42 – Evergreen Forest
+•	43 – Mixed Forest
+
+## Methodology
 
 ### Data Processing:
 
-1.	I downloaded data from 2020-2025 from https://www.mrlc.gov/data. The Multi-Resolution Land Characteristics Consortium provides data for the Annual National Land Cover Database. The data is from remotely sensed Landsat data and provides different land cover types. I focused primarily on forest cover across the lower 48 US states. The files were in geojson files.
+1. Land cover data from 2020–2024 were downloaded from the MRLC website.
 
-2.	I then identified three classes in my raster for forest type of deciduous forest, evergreen forest, and mixed forest. I then reclassified the raster to just show those forests.
+2. Forest cover was extracted by selecting the three NLCD forest classes:
+
+•	Deciduous forest
+•	Evergreen forest
+•	Mixed forest
+
+3. These classes were isolated in QGIS using raster reclassification:
+
 (("landcover@1" = 41) OR
  ("landcover@1" = 42) OR
  ("landcover@1" = 43)) * 1
 
-3.	The next step was to calculate zonal statistics found in each state and in each county.
+4. Zonal statistics were calculated for both states and counties to determine the number of forest pixels within each boundary.
 
-4.	I then calculated percent forest cover in the attribute table for both state and county.
+5. Percent forest cover was calculated in the attribute table using:
+
 ("sum" / "count") * 100
 
-5.	I then exported those files as geojson to be used in the final project.
+6. Final datasets were exported as GeoJSON files for use in the web map.
+
+## Map Objectives
+
+The goals of this project are to:
+
+•	Visualize spatial patterns of forest cover across the United States
+•	Allow users to explore forest cover by year
+•	Allow users to switch between state and county spatial scales
+•	Provide an interactive tool that can help identify regions where forest restoration may be beneficial
+
+## Thematic Representation
+
+The map uses a choropleth visualization to represent percent forest cover.
+
+Darker green colors indicate higher forest cover, while lighter colors represent lower forest cover.
+
+Additional interactive features include:
+
+•	Map popups displaying forest cover values
+•	Dropdown menus for selecting year and spatial scale
+•	Sidebar panel providing project information
+•	Zoom and pan controls for navigation
+
+## Technology Stack
+
+The project uses the following tools and technologies:
+
+•	Leaflet.js – interactive web mapping library
+•	CartoDB Dark Matter basemap – background map tiles
+•	GeoJSON – spatial data format used for map layers
+•	QGIS – spatial analysis and raster processing
+•	GitHub Pages – hosting the interactive map
+
+## Repository Structure
+
+US-Forest-Health-Map/
+│
+├── index.html
+├── README.md
+├── Data/
+│   ├── Forest_Percent_State_2020.geojson
+│   ├── Forest_Percent_State_2021.geojson
+│   ├── Forest_Percent_State_2022.geojson
+│   ├── Forest_Percent_State_2023.geojson
+│   ├── Forest_Percent_State_2024.geojson
+│   ├── Forest_Percent_County_2020.geojson
+│   ├── Forest_Percent_County_2021.geojson
+│   ├── Forest_Percent_County_2022.geojson
+│   ├── Forest_Percent_County_2023.geojson
+│   └── Forest_Percent_County_2024.geojson
 
 
-## Map Objectives:
+## Limitations
 
-•	Visualize spatial patterns of forest health and disturbance across the U.S.
-•	Allow users to explore different years and at state and county level. 
-•	Allow users to visualize percent forest cover across the U.S. and help support locating restoration needs.
+•	Forest health is approximated using percent forest cover, which does not capture all ecological stressors such as pests, drought, wildfire, or disease.
+•	The dataset is derived from satellite imagery, which may include classification uncertainty.
+•	Aggregating data to state and county boundaries may mask fine-scale variation in forest conditions.
 
+## Future Improvements
 
-Thematic Representation Methods:
-•	Choropleth maps to show forest cover, landcover change, or disturbance intensity by county or state.
-•	Point or proportional symbol maps for invasive species occurrences or hazardous sites.
-•	Layer toggles to compare different forest stressors.
-•	Time-based visualizations where applicable (e.g., landcover estimates across years and/or change in temperature).
+Potential improvements for this project include:
 
-User Interface (UI):
-•	Interactive map with zoom and pan.
-•	Dropdown or toggle controls to switch between forest health indicators.
-•	Tooltips providing detailed information for individual features (e.g., site name, year, severity).
-•	Optional linked charts to summarize trends or totals by region.
-•	Responsive layout suitable for desktop viewing.
+•	Adding time-series visualization to show forest cover change over time
+•	Integrating wildfire and disturbance datasets
+•	Adding charts summarizing forest cover trends
+•	Improving mobile responsiveness
 
-## Wireframes:
+## Hosting
 
-•	A main map panel displaying forest health data.
-•	A side panel for controls and charts.
-•	UI elements for filtering by variable or time period.
+The interactive map is hosted using GitHub Pages.
 
-## Data Processing:
+## Links
 
-•	Use of QGIS where needed.
-•	Data formats were GeoJson.
+GitHub Repository
+https://github.com/cnkieffer
 
-Technology Stack:
-•	Leaflet.js – for interactive mapping
-•	Leaflet Choropleth or D3 (if needed) – for thematic styling
-•	Papa Parse – if reading CSV data
-•	Bootstrap – for layout and UI
-•	GitHub Pages – for hosting
-
-## Hosting:
-
-•	Hosting will be done on GitHub pages for the final map.
+Interactive Map
+(Add your GitHub Pages link here once deployed)
