@@ -11,14 +11,34 @@ Users should note this map only cover forest ecosystems and does not include oth
 
 
 ## Data Sources:
+
 https://www.mrlc.gov/data
 
-Map Objectives:
-•	Visualize spatial patterns of forest health and disturbance across the U.S.
-•	Allow users to explore different contributing factors (e.g., invasive species, timber harvests, land use).
+## Methodology:
 
-•	Support comparison between regions using interactive and thematic mapping techniques.
-•	Provide contextual information through tooltips and linked visualizations.
+### Data Processing:
+
+1.	I downloaded data from 2020-2025 from https://www.mrlc.gov/data. The Multi-Resolution Land Characteristics Consortium provides data for the Annual National Land Cover Database. The data is from remotely sensed Landsat data and provides different land cover types. I focused primarily on forest cover across the lower 48 US states. The files were in geojson files.
+
+2.	I then identified three classes in my raster for forest type of deciduous forest, evergreen forest, and mixed forest. I then reclassified the raster to just show those forests.
+(("landcover@1" = 41) OR
+ ("landcover@1" = 42) OR
+ ("landcover@1" = 43)) * 1
+
+3.	The next step was to calculate zonal statistics found in each state and in each county.
+
+4.	I then calculated percent forest cover in the attribute table for both state and county.
+("sum" / "count") * 100
+
+5.	I then exported those files as geojson to be used in the final project.
+
+
+## Map Objectives:
+
+•	Visualize spatial patterns of forest health and disturbance across the U.S.
+•	Allow users to explore different years and at state and county level. 
+•	Allow users to visualize percent forest cover across the U.S. and help support locating restoration needs.
+
 
 Thematic Representation Methods:
 •	Choropleth maps to show forest cover, landcover change, or disturbance intensity by county or state.
@@ -33,14 +53,16 @@ User Interface (UI):
 •	Optional linked charts to summarize trends or totals by region.
 •	Responsive layout suitable for desktop viewing.
 
-Wireframes:
+## Wireframes:
+
 •	A main map panel displaying forest health data.
 •	A side panel for controls and charts.
 •	UI elements for filtering by variable or time period.
 
-Data Processing:
+## Data Processing:
+
 •	Use of QGIS where needed.
-•	Data formats will include CSV and GeoJson.
+•	Data formats were GeoJson.
 
 Technology Stack:
 •	Leaflet.js – for interactive mapping
@@ -49,5 +71,6 @@ Technology Stack:
 •	Bootstrap – for layout and UI
 •	GitHub Pages – for hosting
 
-Hosting:
+## Hosting:
+
 •	Hosting will be done on GitHub pages for the final map.
