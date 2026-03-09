@@ -69,20 +69,23 @@
     #mapInfoBtn:hover { background-color: #66c2a4; }
 
     /* Sidebar */
-    #sidebar {
-      position: fixed;
-      top: 130px; /* below header */
-      left: -320px;
-      width: 300px;
-      height: calc(100vh - 120px);
-      background-color: #444;
-      color: #eee;
-      padding: 1rem;
-      transition: left 0.3s ease;
-      z-index: 1250; /* below Map Info button */
-      overflow-y: auto;
-    }
-    #sidebar.open { left: 0; }
+   #sidebar {
+  position: fixed;
+  top: 130px;
+  bottom: 0;
+  left: -320px;
+  width: 300px;
+  background-color: #5e5d5d;
+  color: #eee;
+  padding: 1rem;
+  transition: left 0.3s ease;
+  z-index: 1250;
+  overflow-y: hidden;
+}
+   #sidebar.open {
+  left: 0;
+  overflow-y: auto;   /* scrollbar appears only when open */
+}
 
     select {
       appearance: none;
@@ -128,7 +131,7 @@
 
 <!-- Sliding Sidebar -->
 <aside id="sidebar">
-  <h2>Map Info</h2>
+  <h2>Map Information</h2>
 
 <h3>About the Map</h3>
 <p>
