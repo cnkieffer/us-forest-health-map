@@ -1,0 +1,7 @@
+{
+  "title": "US Forest Health Explorer",
+  "info": "An interactive web map visualizing forest health conditions across the United States. Users can explore spatial patterns in forest health indicators and view detailed information for individual locations through interactive map popups.",
+  "coordinates": [39.5, -98.35],
+  "author": "Dr. Christina Kieffer",
+  "link": "https://github.com/cnkieffer/us-forest-health-map"
+}
