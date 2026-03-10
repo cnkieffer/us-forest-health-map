@@ -148,4 +148,4 @@ GitHub Repository
 https://github.com/cnkieffer
 
 Interactive Map
-(Add your GitHub Pages link here once deployed)
+[(Add your GitHub Pages link here once deployed)](https://cnkieffer.github.io/us-forest-health-map/)
